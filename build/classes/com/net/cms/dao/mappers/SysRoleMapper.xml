@@ -1,0 +1,70 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.net.cms.dao.SysRoleDao" >
+  
+ 	<select id="query" parameterType="com.net.cms.filter.SysRoleFilter" resultType="com.net.cms.po.SysRole">
+			SELECT
+				F_ID as id,
+				F_ROLE_NAME as roleName,
+				F_REMARK as remark,
+				F_STATUS as status,
+				date_format(F_CREATE_TIME,'%Y-%m-%d %T') as createTime
+			FROM
+				T_SYS_ROLE 	where 1=1
+				<if test=" roleName !=null and roleName !=''">
+					and  instr(F_ROLE_NAME,#{roleName})&gt;0
+				</if>
+				<if test=" remark !=null and remark !=''">
+					and  instr(F_REMARK,#{remark})&gt;0
+				</if>
+				<if test=" status !=null">
+					and  F_STATUS=#{status}
+				</if>						
+				<if test="createTime !=null and createTime !=''">
+					and  date_format(F_CREATE_TIME,'%Y-%m-%d')=#{createTime}
+				</if>	
+				<if test="sidx!=null and sidx!=''">
+					order by ${sidx} ${sord}
+				</if>
+				<if test="sidx == null or sidx==''">
+					order by createTime desc
+				</if>
+	</select>
+	
+	<select id="selectByPrimaryKey" parameterType="String" resultType="com.net.cms.po.SysRole">
+   		SELECT
+				F_ID as id,
+				F_ROLE_NAME as roleName,
+				F_REMARK as remark,
+				F_STATUS as status,
+				date_format(F_CREATE_TIME,'%Y-%m-%d %T') as createTime
+			from T_SYS_ROLE where f_id=#{value}
+   </select>
+   
+   <insert id="insert" parameterType="com.net.cms.po.SysRole">
+   		insert into T_SYS_ROLE(F_ID,F_ROLE_NAME,F_REMARK,F_STATUS,F_CREATE_TIME)
+   		values(#{id,jdbcType=VARCHAR},#{roleName,jdbcType=VARCHAR},#{remark,jdbcType=VARCHAR},
+   				#{status,jdbcType=VARCHAR},now())
+   </insert>
+   
+   <update id="updateByPrimaryKey" parameterType="com.net.cms.po.SysRole">
+   		update T_SYS_ROLE set F_ROLE_NAME=#{roleName,jdbcType=VARCHAR},
+   		F_STATUS=#{status,jdbcType=VARCHAR},F_REMARK=#{remark,jdbcType=VARCHAR}
+   		where F_ID=#{id,jdbcType=VARCHAR}
+   </update>
+   
+   <delete id="batchDelSysRole" parameterType="java.util.List">
+   		delete from T_SYS_ROLE where f_id in 
+   		<foreach item="id" collection="list" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+   </delete>
+   
+   
+   <select id="getUserRoleList" parameterType="String" resultType="com.net.cms.po.SysRole">
+   		select r.f_id as id,r.f_role_name as roleName,IF(ur.f_role_id, 'true', 'false') as isChecked 
+       from t_sys_role r left join t_sys_user_role ur on r.f_id = ur.f_role_id and ur.f_user_id=#{value}
+       where r.f_status=1  
+       order by roleName
+   </select>
+</mapper>

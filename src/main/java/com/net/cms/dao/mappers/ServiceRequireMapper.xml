@@ -1,0 +1,92 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.net.cms.dao.ServiceRequireDao" >
+	<insert id="saveOrUpdateSr" parameterType="com.net.cms.po.ServiceRequire">
+		INSERT INTO t_service_require (
+					f_ID,f_require_code,f_manufacturer_code,f_product_id,f_Service_Type,f_Require_name,f_Require_count,f_Require_uint,f_Require_qualify,
+					f_Require_prive,f_Require_starttime,f_Require_endtime,f_Require_area,f_Require_profile,f_Is_Enable,f_update_time,f_status
+		)VALUES(
+			 #{id,jdbcType=VARCHAR},#{requireCode,jdbcType=VARCHAR},#{manufacturerCode,jdbcType=VARCHAR},#{productId,jdbcType=VARCHAR}, 
+			 #{serviceType,jdbcType=INTEGER}, #{requireName,jdbcType=VARCHAR}, #{requireCount,jdbcType=INTEGER},#{requireUint,jdbcType=INTEGER},
+			 #{requireQualify,jdbcType=INTEGER}, #{requirePrive,jdbcType=INTEGER},#{requireStarttime,jdbcType=VARCHAR}, 
+			 #{requireEndtime,jdbcType=VARCHAR},#{requireArea,jdbcType=VARCHAR},#{requireProfile,jdbcType=VARCHAR},1,now(),0
+			 )
+		 on duplicate key update f_update_time=values(f_update_time),f_require_code=values(f_require_code),f_product_id=values(f_product_id),f_Service_Type=values(f_Service_Type),
+		 				f_Require_name=values(f_Require_name),f_Require_count=values(f_Require_count),f_Require_uint=values(f_Require_uint),f_Require_qualify=values(f_Require_qualify),
+		 				f_Require_prive=values(f_Require_prive),f_Require_starttime=values(f_Require_starttime),f_Require_endtime=values(f_Require_endtime),f_Require_area=values(f_Require_area),
+		 				f_Require_profile=values(f_Require_profile)
+	</insert>
+	
+	
+	<select id="checkCode" resultType="Integer">
+		select count(f_id) as value from  t_service_require where 1=1
+   		<if test="id !=null and id != ''">
+   			and f_id!=#{id,jdbcType=VARCHAR}
+   		</if>
+   		<if test="requireCode != null and requireCode != ''">
+			and f_require_code = #{requireCode,jdbcType=VARCHAR}
+		</if>
+	</select>
+	
+	<select id="query" parameterType="com.net.cms.filter.ServiceRequireFilter" resultType="com.net.cms.po.ServiceRequire">
+		select	f_ID as id,f_require_code as requireCode,f_manufacturer_code as manufacturerCode,f_product_id as productId,
+				f_Service_Type as serviceType,f_Require_name as requireName,f_Require_count as requireCount,f_Require_uint as requireUint,
+				f_Require_qualify as requireQualify,f_Require_prive as requirePrive,f_Require_starttime as requireStarttime,f_status as status,
+				f_Require_endtime as requireEndtime,f_Require_area as requireArea,f_Require_profile as requireProfile,f_Is_Enable as isEnable
+					from t_service_require where 1=1
+					<if test=" manuCode !=null and manuCode !=''">
+						and  f_manufacturer_code=#{manuCode,jdbcType=VARCHAR}
+					</if>
+					<if test=" requireCode !=null and requireCode !=''">
+						and  instr(f_require_code,#{requireCode})&gt;0
+					</if>
+					<if test=" requireName !=null and requireName !=''">
+						and  instr(f_Require_name,#{requireName})&gt;0
+					</if>
+					<if test=" serviceType !=null">
+						and  f_Service_Type=#{serviceType}
+					</if>	
+					<if test=" isEnable !=null">
+						and  f_Is_Enable=#{isEnable}
+					</if>	
+					<if test=" requireQualify !=null">
+						and  f_Require_qualify=#{requireQualify}
+					</if>	
+					<if test=" requireCount !=null ">
+						and  instr(f_Require_count,#{requireCount})&gt;0
+					</if>
+					<if test=" requirePrive !=null ">
+						and  instr(f_Require_prive,#{requirePrive})&gt;0
+					</if>
+					<if test=" requireStarttime !=null and requireStarttime!=''">
+						and f_Require_starttime &lt;= #{requireStarttime}
+						and f_Require_endtime >= #{requireStarttime}
+					</if>
+					order by f_update_time desc
+	</select>
+	
+	<select id="selectByPrimaryKey" parameterType="String" resultType="com.net.cms.po.ServiceRequire">
+		select sr.f_id as id,sr.f_require_code as requireCode,sr.f_manufacturer_code as manufacturerCode,sr.f_product_id as productId,
+				sr.f_Service_Type as serviceType,sr.f_Require_name as requireName,sr.f_Require_count as requireCount,
+				sr.f_Require_uint as requireUint,sr.f_Require_qualify as requireQualify,sr.f_Require_prive as requirePrive,
+				sr.f_Require_starttime as requireStarttime,sr.f_Require_endtime as requireEndtime,sr.f_Require_area as requireArea,
+				sr.f_Require_profile as requireProfile,sr.f_Is_Enable as isEnable,ps.f_product_name as productName,ps.f_serial_ID as serialId
+  			from t_service_require sr left join t_product_struct ps on sr.f_product_id = ps.f_id
+  			where sr.f_id=#{value,jdbcType=VARCHAR}
+	</select>
+	<delete id="deleteByPrimaryKey" parameterType="String">
+		delete from t_service_require where f_id=#{value,jdbcType=VARCHAR}
+	</delete>
+	
+	<select id="findNotChooseResolutionSr" resultType="com.net.cms.po.KeyValueBean">
+		select sr.f_id as fkey,sr.f_Require_name as fvalue from t_service_require sr where sr.f_status=0
+		<if test=" manuCode !=null and manuCode !=''">
+			and  f_manufacturer_code=#{manuCode,jdbcType=VARCHAR}
+		</if>
+		order by sr.f_Require_name 
+	</select>
+	
+	<update id="updateStatusById">
+		update 	t_service_require set f_status=#{status,jdbcType=INTEGER},f_update_time=now() where f_id=#{id,jdbcType=VARCHAR}
+	</update>
+</mapper>

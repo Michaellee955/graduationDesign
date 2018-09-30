@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.net.cms.dao.SysRolePermisDao" >
+  <resultMap id="BaseResultMap" type="com.net.cms.po.SysRolePermis" >
+
+    <id column="F_ID" property="id"  />
+    <result column="F_ROLE_ID" property="roleId" />
+    <result column="F_PERMISSION_ID" property="permissionId" />
+    <result column="F_CREATE_TIME" property="createTime"  />
+
+  </resultMap>
+  
+  
+ 	<select id="queryAll" parameterType="com.net.cms.po.SysRolePermis" resultMap="BaseResultMap">
+
+		
+				SELECT
+					F_ID,
+					F_ROLE_ID,
+					F_PERMISSION_ID,
+					F_CREATE_TIME
+				FROM
+					T_SYS_ROLE_PERMIS 
+					<trim prefix="where" prefixOverrides="and">
+					
+						<if test=" id !=null and id !=''">
+							and F_ID= #{id}
+						</if>
+						<if test=" roleId !=null and roleId !=''">
+							and  F_ROLE_ID=#{roleId}
+						</if>
+						<if test=" permissionId !=null and permissionId !=''">
+							and F_PERMISSION_ID=#{permissionId}
+						</if>
+					
+						<if test=" createTime !=null and createTime !=''">
+							and  instr(F_CREATE_TIME,#{createTime})&gt;0
+						</if>	
+				</trim>
+	</select>
+
+
+
+	<select id="selectByPrimaryKey" parameterType="string" resultMap="BaseResultMap">
+		select * from T_SYS_ROLE_PERMIS where  F_ID = #{id}
+
+	</select>
+	
+
+
+  
+	<insert id="insert" parameterType="com.net.cms.po.SysRolePermis">
+	INSERT INTO T_SYS_ROLE_PERMIS (
+			F_ID,
+			F_ROLE_ID,
+			F_PERMISSION_ID,
+			F_CREATE_TIME
+	)VALUES(
+		 trim(#{id,jdbcType=VARCHAR}),
+		 trim(#{roleId,jdbcType=VARCHAR}),
+		 trim(#{permissionId,jdbcType=VARCHAR}),
+		 now()
+		 
+	)
+	</insert>
+	
+
+
+	<update id="updateByPrimaryKey" parameterType="com.net.cms.po.SysRolePermis">
+    UPDATE T_SYS_ROLE_PERMIS SET
+    	<if test=" roleId !=null and roleId !=''">
+			F_ROLE_ID=trim(#{roleId,jdbcType=VARCHAR}), 
+		</if>
+		<if test=" permissionId !=null and permissionId !=''">
+			F_PERMISSION_ID=trim(#{permissionId,jdbcType=VARCHAR})
+		</if>
+
+	   	WHERE F_ID = #{id}
+  	</update>	
+  	
+	
+	<delete id="deleteByPrimaryKey" parameterType="String">
+		delete from  T_SYS_ROLE_PERMIS where F_ID = #{id}
+	</delete>
+	
+	<delete id="deleteByRoleId" parameterType="String">
+		delete from  T_SYS_ROLE_PERMIS where F_ROLE_ID = #{roleId} 
+	</delete>	
+	<delete id="deleteByPermisId" parameterType="String">
+		delete from T_SYS_ROLE_PERMIS where F_PERMISSION_ID=#{permisId}
+	</delete>	
+	
+	<insert id="saveRolePermis" parameterType="java.util.List">
+		insert into T_SYS_ROLE_PERMIS(F_ID,F_ROLE_ID,F_PERMISSION_ID,F_CREATE_TIME) values
+		<foreach collection="list" item="rp" separator=",">
+			(#{rp.id},#{rp.roleId},#{rp.permissionId},now())
+		</foreach>
+	</insert>
+	<delete id="deleteRolePermisByRoleIdList" parameterType="java.util.List">
+		delete from T_SYS_ROLE_PERMIS 
+		where F_ROLE_ID in 
+   		<foreach item="id" collection="list" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	<delete id="deleteRolePermisByPermisIdList" parameterType="java.util.List">
+		delete from T_SYS_ROLE_PERMIS 
+		where F_PERMISSION_ID in 
+   		<foreach item="id" collection="list" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+</mapper>

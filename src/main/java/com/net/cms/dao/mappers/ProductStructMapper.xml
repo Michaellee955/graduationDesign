@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.net.cms.dao.ProductStructDao" >
+
+	<select id="findAllPsListBySid" resultType="com.net.cms.po.ProductStruct">
+		select ps.f_id as id,
+		 ps.f_product_id as productId,
+		 ps.f_serial_ID as serialId,
+		 ps.f_pid as pid,
+		 ps.f_product_name as productName,
+		 t2.f_product_name as parentName,
+		 ps.f_function_type as functionType,
+		 ps.f_function_pos as functionPos,
+		 (select count(f_id) from t_product_struct t where t.f_pid = ps.f_id)  as childCount
+		 from t_product_struct ps left join t_product_struct t2 on ps.f_pid = t2.f_id
+		 where ps.f_serial_ID=#{value}
+	</select>
+	
+	
+	
+	<select  id="findIdListByPid"  resultType="String">
+		select ps.f_id as id from t_product_struct ps where ps.f_pid in
+		 <foreach collection="array" item="id" index="i" open="(" separator="," close=")">
+            #{id}
+        </foreach>
+	</select>
+	
+</mapper>

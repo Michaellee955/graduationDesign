@@ -1,0 +1,153 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.net.cms.dao.SysUserDao" >
+ 	<select id="query" parameterType="com.net.cms.filter.SysUserFilter" resultType="com.net.cms.po.SysUser">
+				SELECT
+		          u.F_ID as id,
+		          u.F_LOGIN_NAME as loginName,
+		          u.F_USER_NAME as userName,
+		          u.F_STATUS as status,
+		          u.F_CREATE_USER as createUser,
+				  DATE_FORMAT(u.F_CREATE_TIME,'%Y-%m-%d %T') as createTime,
+		          u.F_UPDATE_USER as updateUser,
+				  DATE_FORMAT(u.F_UPDATE_TIME,'%Y-%m-%d %T') as updateTime
+        	FROM     T_SYS_USER u 
+        	where  u.f_login_name!='admin'
+						<if test=" loginName !=null and loginName !=''">
+							and  instr(u.F_LOGIN_NAME,#{loginName})&gt;0
+						</if>
+						<if test=" userName !=null and userName !=''">
+							and  instr(u.F_USER_NAME,#{userName})&gt;0
+						</if>						
+						<if test=" status !=null">
+							and  u.F_STATUS=#{status}
+						</if>	
+						<if test=" createUser !=null and createUser !=''">
+							and  instr(u.F_CREATE_USER,#{createUser})&gt;0
+						</if>												
+						<if test=" createTime !=null and createTime !=''">
+							and  date_format(u.F_CREATE_TIME,'%Y-%m-%d')=#{createTime}
+						</if>	
+						<if test=" updateUser !=null and updateUser !=''">
+							and  instr(u.F_UPDATE_USER,#{updateUser})&gt;0
+						</if>												
+						<if test=" updateTime !=null and updateTime !=''">
+							and  date_format(u.F_UPDATE_TIME,'%Y-%m-%d')=#{updateTime}
+						</if>							
+						<if test="sidx!=null and sidx!=''">
+							order by ${sidx} ${sord}
+						</if>
+						<if test="sidx == null or sidx==''">
+							order by createTime desc
+						</if>
+	</select>
+
+	<select id="selectByPrimaryKey" parameterType="string" resultType="com.net.cms.po.SysUser">
+			SELECT
+		          u.F_ID as id,
+		          u.F_LOGIN_NAME as loginName,
+		          u.F_USER_NAME as userName,
+		          u.F_LOGIN_PWD as loginPwd,
+		          u.F_STATUS as status,
+		          u.F_CREATE_USER as createUser,
+				  DATE_FORMAT(u.F_CREATE_TIME,'%Y-%m-%d %T') as createTime,
+		          u.F_UPDATE_USER as updateUser,
+				  DATE_FORMAT(u.F_UPDATE_TIME,'%Y-%m-%d %T') as updateTime
+		 from T_SYS_USER u where  u.F_ID = #{id}
+	</select>
+	
+	<insert id="saveOrUpdateUser" parameterType="com.net.cms.po.SysUser">
+		INSERT INTO T_SYS_USER (
+			F_ID,F_LOGIN_NAME,F_LOGIN_PWD,F_USER_NAME,F_STATUS,F_CREATE_USER,F_CREATE_TIME,f_update_user,f_update_time,f_manu_id
+			) VALUES(
+				trim(#{id,jdbcType=VARCHAR}), trim(#{loginName,jdbcType=VARCHAR}), trim(#{loginPwd,jdbcType=VARCHAR}), trim(#{userName,jdbcType=VARCHAR}),
+		 		trim(#{status,jdbcType=INTEGER}), trim(#{createUser,jdbcType=VARCHAR}), NOW(),trim(#{createUser,jdbcType=VARCHAR}), NOW(),trim(#{manuId,jdbcType=VARCHAR})
+		 	)
+		 	on duplicate key update F_STATUS=values(F_STATUS),f_update_user=values(f_update_user),f_update_time=values(f_update_time)
+	</insert>
+	
+	<insert id="insert" parameterType="com.net.cms.po.SysUser">
+	INSERT INTO T_SYS_USER (
+			F_ID,
+			F_LOGIN_NAME,
+			F_LOGIN_PWD,
+			F_USER_NAME,
+			F_STATUS,
+			F_CREATE_USER,
+			F_CREATE_TIME
+	)VALUES(
+		 trim(#{id,jdbcType=VARCHAR}),
+		 trim(#{loginName,jdbcType=VARCHAR}),
+		 trim(#{loginPwd,jdbcType=VARCHAR}),
+		 trim(#{userName,jdbcType=VARCHAR}),
+		 trim(#{status,jdbcType=INTEGER}),
+		 trim(#{createUser,jdbcType=VARCHAR}),
+		 NOW())
+	</insert>
+	
+
+
+	<update id="updateByPrimaryKey" parameterType="com.net.cms.po.SysUser">
+    UPDATE T_SYS_USER SET
+    	<if test=" loginName !=null and loginName !=''">
+			F_LOGIN_NAME=trim(#{loginName,jdbcType=VARCHAR}), 
+		</if>
+		<if test=" loginPwd !=null and loginPwd !=''">
+			F_LOGIN_PWD=trim(#{loginPwd,jdbcType=VARCHAR}),
+		</if>
+    	<if test=" userName !=null and userName !=''">
+			F_USER_NAME=trim(#{userName,jdbcType=VARCHAR}), 
+		</if>
+		<if test=" status !=null and status !=''">
+			F_STATUS=trim(#{status,jdbcType=INTEGER}),
+		</if>
+    	<if test=" updateUser !=null and updateUser !=''">
+			F_UPDATE_USER=trim(#{updateUser,jdbcType=VARCHAR}), 
+		</if>		
+		F_UPDATE_TIME=NOW()
+	   	WHERE F_ID = #{id}
+	   	 and F_LOGIN_NAME!='admin'
+  	</update>	
+  	
+	
+	<delete id="deleteByPrimaryKey" parameterType="String">
+		delete T_SYS_USER where F_ID = #{id} and F_LOGIN_NAME!='admin'
+	</delete>
+
+	<select id="login" resultType="com.net.cms.shiro.ShiroUser" parameterType="java.util.Map">
+		select u.f_id as id,u.f_login_name as loginName,
+			   u.f_status as status,u.f_user_name as userName,mb.f_code as manuCode
+			   from T_SYS_USER u  left join t_manufacturer_basicinfo mb on u.f_manu_id = mb.f_id
+		 where u.f_login_name=#{loginName} and u.f_login_pwd=#{loginPwd}
+	</select>
+
+	<select id="findRoleIdsByUserId" parameterType="String" resultType="String">
+		select r.F_ID from  T_SYS_USER_ROLE ur,T_SYS_ROLE r where ur.F_ROLE_ID = r.F_ID and r.F_STATUS=1 and ur.F_USER_ID=#{value}
+	</select>
+
+
+	<select id="checkLoginName" parameterType="java.util.Map" resultType="Integer">
+		select count(f_id) as value from  T_SYS_USER where 1=1
+   		<if test="id !=null and id != ''">
+   			and f_id!=#{id}
+   		</if>
+   		<if test="loginName != null and loginName != ''">
+			and f_login_name = #{loginName}
+		</if>
+	</select>
+	
+	<delete id="batchDelSysUser" parameterType="java.util.List">
+   		delete from T_SYS_USER where f_id in 
+   		<foreach item="id" collection="list" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+   </delete>
+	
+	<select id="getLoginPwdById" parameterType="String" resultType="String">
+   		select F_LOGIN_PWD from T_SYS_USER where f_id=#{value}
+   </select>
+   
+    <update id="updateLoginPwdById" parameterType="java.util.Map">
+   		update T_SYS_USER set F_LOGIN_PWD=#{loginPwd} where f_id=#{id}
+   </update>
+</mapper>

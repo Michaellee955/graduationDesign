@@ -1,0 +1,115 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.net.cms.dao.SysUserRoleDao" >
+  <resultMap id="BaseResultMap" type="com.net.cms.po.SysUserRole" >
+
+    <id column="F_ID" property="id"  />
+    <result column="F_ROLE_ID" property="roleId" />
+    <result column="F_USER_ID" property="userId" />
+    <result column="F_CREATE_TIME" property="createTime"  />
+
+  </resultMap>
+  
+  
+ 	<select id="queryAll" parameterType="com.net.cms.po.SysUserRole" resultMap="BaseResultMap">
+
+					F_ID,
+					F_ROLE_ID,
+					F_USER_ID,
+					F_CREATE_TIME
+				FROM
+					T_SYS_USER_ROLE 
+					<trim prefix="where" prefixOverrides="and">
+					
+						<if test=" id !=null and id !=''">
+							and F_ID= #{id}
+						</if>
+						<if test=" roleId !=null and roleId !=''">
+							and  F_ROLE_ID=#{roleId}
+						</if>
+						<if test=" userId !=null and userId !=''">
+							and F_USER_ID=#{userId}
+						</if>
+					
+						<if test=" createTime !=null and createTime !=''">
+							and  instr(F_CREATE_TIME,#{createTime})&gt;0
+						</if>	
+				</trim>
+					
+					
+	</select>
+
+
+
+	<select id="selectByPrimaryKey" parameterType="string" resultMap="BaseResultMap">
+		select * from T_SYS_USER_ROLE where  F_ID = #{id}
+
+	</select>
+	
+
+
+  
+	<insert id="insert" parameterType="com.net.cms.po.SysUserRole">
+	INSERT INTO T_SYS_USER_ROLE (
+					F_ID,
+					F_ROLE_ID,
+					F_USER_ID,
+					F_CREATE_TIME
+	)VALUES(
+		 trim(#{id,jdbcType=VARCHAR}),
+		 trim(#{roleId,jdbcType=VARCHAR}),
+		 trim(#{userId,jdbcType=VARCHAR}),
+		 now()
+	)
+	</insert>
+	
+
+
+	<update id="updateByPrimaryKey" parameterType="com.net.cms.po.SysUserRole">
+    UPDATE T_SYS_USER_ROLE SET
+    	<if test=" roleId !=null and roleId !=''">
+			F_ROLE_ID=trim(#{roleId,jdbcType=VARCHAR}), 
+		</if>
+		<if test=" userId !=null and userId !=''">
+			F_USER_ID=trim(#{userId,jdbcType=VARCHAR})
+		</if>
+
+	   	WHERE F_ID = #{id}
+  	</update>	
+  	
+	
+	<delete id="deleteByPrimaryKey" parameterType="String">
+		delete T_SYS_USER_ROLE where F_ID = #{id}
+	</delete>
+
+	<delete id="deleteByUserId" parameterType="String">
+		delete T_SYS_USER_ROLE where F_USER_ID=#{userId}
+	</delete>
+	
+	<delete id="deleteByRoleId" parameterType="String">
+		delete T_SYS_USER_ROLE where F_ROLE_ID = #{roleId}
+	</delete>
+	
+	<delete id="deleteUserRoleByRoleIdList" parameterType="java.util.List">
+		delete from T_SYS_USER_ROLE 
+		where F_ROLE_ID in 
+   		<foreach item="id" collection="list" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	<delete id="deleteUserRoleByUserIdList" parameterType="java.util.List">
+		delete from T_SYS_USER_ROLE 
+		where F_USER_ID in 
+   		<foreach item="id" collection="list" open="(" separator="," close=")">
+			#{id}
+		</foreach>
+	</delete>
+	
+	<insert id="saveUserRole" parameterType="java.util.List">
+		insert into T_SYS_USER_ROLE(F_ID,F_ROLE_ID,F_USER_ID,F_CREATE_TIME) values
+		<foreach collection="list" item="ur" separator=",">
+			(#{ur.id},#{ur.roleId},#{ur.userId},now())
+		</foreach>
+		on  duplicate key update F_CREATE_TIME = values(F_CREATE_TIME)
+	</insert>
+</mapper>

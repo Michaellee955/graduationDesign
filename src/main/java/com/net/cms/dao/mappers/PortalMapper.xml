@@ -1,0 +1,22 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.net.cms.dao.PortalDao" >
+
+	<select id="queryPrByFilter" parameterType="com.net.cms.filter.PortalFilter" resultType="com.net.cms.po.PortalBean">
+				select f_ID as id,f_resources_Code as code,f_Service_Type as type,f_Providing_name as name,f_Service_ability as count,
+					f_product_qualify as qualify,f_Service_prive as prive,f_Service_starttime as startTime,f_Service_endtime as endTime
+					from t_providing_resources where 1=1
+					<if test=" data !=null and data !=''">
+						and  instr(f_Providing_name,#{data})&gt;0
+					</if>
+	</select>
+	
+	<select id="querySrByFilter" parameterType="com.net.cms.filter.PortalFilter" resultType="com.net.cms.po.PortalBean">
+				select	f_ID as id,f_require_code as code,f_Service_Type as type,f_Require_name as name,f_Require_count as count,
+				f_Require_qualify as qualify,f_Require_prive as prive,f_Require_starttime as startTime,f_Require_endtime as endTime
+					from t_service_require where 1=1
+					<if test=" data !=null and data !=''">
+						and  instr(f_Require_name,#{data})&gt;0
+					</if>
+	</select>
+</mapper>

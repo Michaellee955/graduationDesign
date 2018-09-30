@@ -1,0 +1,118 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.net.cms.dao.SysPermisDao" >
+	<select id="selectByPrimaryKey" parameterType="string" resultType="com.net.cms.po.SysPermis">
+		 SELECT
+   					F_ID as id,
+					F_PCODE as pCode,
+					F_PNAME as pName,
+					F_STATUS as status,
+					date_format(F_CREATE_TIME,'%Y-%m-%d %T') as createTime,
+					F_PARENT_ID as parentId,
+					F_REMARK as remark,
+					F_PLEVEL as pLevel,
+					F_PINDEX as pIndex 
+    	FROM T_SYS_PERMIS where  F_ID = #{id}
+
+	</select>
+	
+	<insert id="insert" parameterType="com.net.cms.po.SysPermis">
+	INSERT INTO T_SYS_PERMIS (
+			F_ID,
+			F_PCODE,
+			F_PNAME,
+			F_STATUS,
+			F_CREATE_TIME,
+			F_PARENT_ID,
+			F_REMARK,
+			F_PLEVEL,
+			F_PINDEX
+	)VALUES(
+		 trim(#{id,jdbcType=VARCHAR}),
+		 trim(#{pCode,jdbcType=VARCHAR}),
+		 trim(#{pName,jdbcType=VARCHAR}),
+		 trim(#{status,jdbcType=INTEGER}),
+		 now(),
+		 trim(#{parentId,jdbcType=VARCHAR}),
+		 trim(#{remark,jdbcType=VARCHAR}),
+		 trim(#{pLevel,jdbcType=VARCHAR}),
+		 trim(#{pIndex,jdbcType=VARCHAR})
+	)
+	</insert>
+	
+
+
+	<update id="updateByPrimaryKey" parameterType="com.net.cms.po.SysPermis">
+    UPDATE T_SYS_PERMIS SET
+    	<if test=" pCode !=null and pCode !=''">
+			F_PCODE=trim(#{pCode,jdbcType=VARCHAR}), 
+		</if>
+		<if test=" pName !=null and pName !=''">
+			F_PNAME=trim(#{pName,jdbcType=VARCHAR}),
+		</if>
+		<if test=" status !=null and status !=''">
+			F_STATUS=trim(#{status,jdbcType=INTEGER}),
+		</if>
+		<if test=" remark !=null and remark !=''">
+			F_REMARK=#{remark},
+		</if>
+		<if test=" pIndex !=null and pIndex !=''">
+			F_PINDEX=#{pIndex}
+		</if>
+    	WHERE F_ID = #{id}
+  	</update>	
+  	
+	
+	<delete id="deleteByPrimaryKey" parameterType="String">
+		delete T_SYS_PERMIS where F_ID = #{id}
+	</delete>
+	
+	<select id="findAllPermisCode" resultType="String">
+		select F_PCODE from T_SYS_PERMIS p
+	</select>
+	
+	<select id="findRolePermisCode" parameterType="java.util.List" resultType="String">
+		select F_PCODE from T_SYS_PERMIS p,T_SYS_ROLE_PERMIS rp 
+		where p.F_STATUS=1 and p.F_ID = rp.F_PERMISSION_ID	and rp.F_ROLE_ID in
+		<foreach collection="list" item="roleId" open="(" separator="," close=")">
+				#{roleId}
+		</foreach>
+	</select>
+	  
+	  
+	  <select id="getChildNodes" parameterType="String" resultType="com.net.cms.po.SysPermis">
+		SELECT
+					t1.F_ID as id,
+					t1.f_pcode as pCode,
+					t1.f_pname as pName,
+					t1.F_PARENT_ID as parentId,
+					t2.F_Pname as parentName,
+					t1.f_pindex as pIndex,
+					t1.f_plevel as pLevel,
+					(select count(f_id) from T_SYS_PERMIS t where t.F_PARENT_ID = t1.f_id)  as childCount
+				FROM T_SYS_PERMIS t1 left join T_SYS_PERMIS t2 on t1.F_PARENT_ID = t2.f_id
+					where t1.F_PARENT_ID=#{value}
+					order by pIndex 
+	</select>
+	
+	<select id="checkPcode" parameterType="java.util.Map" resultType="Integer">
+		select count(f_id) as value from  T_SYS_PERMIS where 1=1
+   		<if test="id !=null and id != ''">
+   			and f_id!=#{id}
+   		</if>
+   		<if test="pId !=null and pId != ''">
+   			and F_PARENT_ID=#{pId}
+   		</if>
+   		<if test="pCode != null and pCode != ''">
+			and f_pcode = #{pCode}
+		</if>
+	</select>
+	
+	<select id="getRolePermisList" parameterType="String" resultType="com.net.cms.po.SysPermis">
+		SELECT p1.F_ID as id,p1.f_pname as pName,p1.F_PARENT_ID as parentId,IF(length(rp.f_role_id)>0, 'true', 'false') as isChecked
+		  from T_SYS_PERMIS p1 left join  T_SYS_ROLE_PERMIS rp on p1.F_ID = rp.F_PERMISSION_ID and rp.F_ROLE_ID= #{value,}
+		 where p1.F_STATUS = 1 
+		 order by F_PLEVEL, F_PINDEX
+	</select>
+	  
+</mapper>

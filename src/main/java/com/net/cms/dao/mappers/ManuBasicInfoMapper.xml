@@ -1,0 +1,82 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.net.cms.dao.ManuBasicInfoDao" >
+
+	<select id="query" parameterType="com.net.cms.filter.ManuBasicInfoFilter" resultType="com.net.cms.po.ManuBasicInfo">
+				select f_id as id,f_code as code,f_name as name,f_addr as addr,f_type as type,
+					f_contact_person as contactPerson,f_Contact_number as contactNumber,f_enterprise_profile as enterpriseProfile,
+					f_enterprise_qualification as enterpriseQualification,f_comment_score as commentScore,date_format(f_create_time,'%Y-%m-%d') as createTime,
+					f_enterprise_photo as enterprisePhoto,f_status as status
+					from t_manufacturer_basicinfo where 1=1 
+					<if test=" code !=null and code !=''">
+						and  instr(f_code,#{code})&gt;0
+					</if>
+					<if test=" name !=null and name !=''">
+						and  instr(f_name,#{name})&gt;0
+					</if>
+					<if test=" addr !=null and addr !=''">
+						and  instr(f_addr,#{addr})&gt;0
+					</if>
+					<if test=" type !=null">
+							and  f_type=#{type}
+						</if>	
+					<if test=" dataType !=null">
+							and  f_data_type=#{dataType}
+						</if>	
+					<if test=" status !=null">
+							and  f_status=#{status}
+						</if>	
+					<if test=" contactPerson !=null and contactPerson !=''">
+						and  instr(f_contact_person,#{contactPerson})&gt;0
+					</if>
+					<if test=" contactNumber !=null and contactNumber !=''">
+						and  instr(f_Contact_number,#{contactNumber})&gt;0
+					</if>
+					<if test=" enterpriseQualification !=null">
+						and  f_enterprise_qualification=#{enterpriseQualification}
+					</if>
+					<if test=" createTime !=null">
+						and  date_format(f_create_time,'%Y-%m-%d')=#{createTime}
+					</if>
+					<if test=" commentScore !=null">
+						and  instr(f_comment_score,#{commentScore})&gt;0
+					</if>
+	</select>
+
+	<insert id="saveOrUpdateMbi" parameterType="com.net.cms.po.ManuBasicInfo">
+		INSERT INTO t_manufacturer_basicinfo (
+					f_id,f_code,f_name,f_addr,f_type,f_status,
+					f_contact_person,f_Contact_number,f_enterprise_profile,
+					f_enterprise_qualification,f_comment_score,f_create_time,f_enterprise_photo,f_data_type
+		)VALUES(
+			 #{id,jdbcType=VARCHAR},#{code,jdbcType=VARCHAR},#{name,jdbcType=VARCHAR},#{addr,jdbcType=VARCHAR}, #{type,jdbcType=INTEGER},0,
+			 #{contactPerson,jdbcType=VARCHAR}, #{contactNumber,jdbcType=VARCHAR},#{enterpriseProfile,jdbcType=VARCHAR},
+			 #{enterpriseQualification,jdbcType=VARCHAR},0,now(),#{enterprisePhoto,jdbcType=VARCHAR}, #{dataType,jdbcType=INTEGER}
+			 )
+		 on duplicate key update f_name=values(f_name),f_addr=values(f_addr),f_type=values(f_type),f_contact_person=values(f_contact_person),f_Contact_number=values(f_Contact_number),
+		 f_enterprise_profile=values(f_enterprise_profile),f_enterprise_qualification=values(f_enterprise_qualification),f_enterprise_photo=values(f_enterprise_photo)
+	</insert>
+	
+	<select id="selectByPrimaryKey" parameterType="String" resultType="com.net.cms.po.ManuBasicInfo">
+			select f_id as id,f_code as code,f_name as name,f_addr as addr,f_type as type,
+					f_contact_person as contactPerson,f_Contact_number as contactNumber,f_enterprise_profile as enterpriseProfile,
+					f_enterprise_qualification as enterpriseQualification,f_comment_score as commentScore,date_format(f_create_time,'%Y-%m-%d') as createTime,
+					f_enterprise_photo as enterprisePhoto,f_status as status
+					from t_manufacturer_basicinfo where f_id=#{value,jdbcType=VARCHAR}
+	</select>
+	
+	<update id="updateStatusById">
+		update 	t_manufacturer_basicinfo set f_status=#{status,jdbcType=INTEGER} where f_id=#{id,jdbcType=VARCHAR}
+	</update>
+	
+	<select id="checkCode" resultType="Integer">
+		select count(f_id) as value from  t_manufacturer_basicinfo where 1=1
+   		<if test="id !=null and id != ''">
+   			and f_id!=#{id,jdbcType=VARCHAR}
+   		</if>
+   		<if test="code != null and code != ''">
+			and f_code = #{code,jdbcType=VARCHAR}
+		</if>
+	</select>
+	
+</mapper>

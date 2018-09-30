@@ -1,0 +1,117 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.net.cms.dao.ProvidingResourcesDao" >
+
+	<insert id="saveOrUpdatePr" parameterType="com.net.cms.po.ProvidingResources">
+		INSERT INTO t_providing_resources (
+					f_ID,f_resources_Code,f_product_id,f_manufacturer_code,f_Service_Type,f_Providing_name,f_Service_ability,
+					f_Ability_uint,f_product_qualify,f_Service_prive,f_pricing_mode,f_Service_starttime,
+					f_Service_endtime,f_Service_area,f_Service_profile,f_Service_photo,f_Is_Enable,f_update_time
+		)VALUES(
+			 #{id,jdbcType=VARCHAR},#{resourcesCode,jdbcType=VARCHAR},#{productId,jdbcType=VARCHAR},#{manufacturerCode,jdbcType=VARCHAR},#{serviceType,jdbcType=INTEGER},
+			  #{providingName,jdbcType=INTEGER},#{serviceAbility,jdbcType=INTEGER},#{abilityUint,jdbcType=INTEGER},#{productQualify,jdbcType=INTEGER},
+			  #{servicePrive,jdbcType=INTEGER},#{pricingMode,jdbcType=INTEGER},#{serviceStarttime,jdbcType=VARCHAR},#{serviceEndtime,jdbcType=VARCHAR},
+			  #{serviceArea,jdbcType=INTEGER},#{serviceProfile,jdbcType=VARCHAR},#{servicePhoto,jdbcType=VARCHAR},1,now()
+			 )
+		 on duplicate key update f_update_time=values(f_update_time),f_resources_Code=values(f_resources_Code),f_product_id=values(f_product_id),f_Service_Type=values(f_Service_Type),
+		 f_Providing_name=values(f_Providing_name),f_Service_ability=values(f_Service_ability),f_Ability_uint=values(f_Ability_uint),f_product_qualify=values(f_product_qualify),f_Service_prive=values(f_Service_prive),
+		 f_pricing_mode=values(f_pricing_mode),f_Service_starttime=values(f_Service_starttime),f_Service_endtime=values(f_Service_endtime),f_Service_area=values(f_Service_area),f_Service_profile=values(f_Service_profile),
+		 f_Service_photo=values(f_Service_photo)
+	</insert>
+	
+	<select id="checkCode" resultType="Integer">
+		select count(f_id) as value from  t_providing_resources where 1=1
+   		<if test="id !=null and id != ''">
+   			and f_id!=#{id,jdbcType=VARCHAR}
+   		</if>
+   		<if test="resourcesCode != null and resourcesCode != ''">
+			and f_resources_Code = #{resourcesCode,jdbcType=VARCHAR}
+		</if>
+	</select>
+	
+	<select id="query" parameterType="com.net.cms.filter.ProvidingResourcesFilter" resultType="com.net.cms.po.ProvidingResources">
+		select f_ID as id,f_resources_Code as resourcesCode,f_product_id as productId,f_manufacturer_code as manufacturerCode,
+					f_Service_Type as serviceType,f_Providing_name as providingName,f_Service_ability as serviceAbility,
+					f_Ability_uint as abilityUint,f_product_qualify as productQualify,f_Service_prive as servicePrive,
+					f_pricing_mode as pricingMode,f_Service_starttime as serviceStarttime,f_Service_endtime as serviceEndtime,
+					f_Service_area as serviceArea,f_Service_profile as serviceProfile,f_Service_photo as servicePhoto,f_Is_Enable as isEnable
+					from t_providing_resources where 1=1
+					<if test=" manuCode !=null and manuCode!=''">
+						and f_manufacturer_code = #{manuCode,jdbcType=VARCHAR}
+					</if>
+					<if test=" resourcesCode !=null and resourcesCode !=''">
+						and  instr(f_resources_Code,#{resourcesCode})&gt;0
+					</if>
+					<if test=" providingName !=null and providingName !=''">
+						and  instr(f_Providing_name,#{providingName})&gt;0
+					</if>
+					<if test=" serviceType !=null">
+						and  f_Service_Type=#{serviceType}
+					</if>	
+					<if test=" isEnable !=null">
+						and  f_Is_Enable=#{isEnable}
+					</if>	
+					<if test=" productQualify !=null">
+						and  f_product_qualify=#{productQualify}
+					</if>	
+					<if test=" serviceAbility !=null ">
+						and  instr(f_Service_ability,#{serviceAbility})&gt;0
+					</if>
+					<if test=" servicePrive !=null ">
+						and  instr(f_Service_prive,#{servicePrive})&gt;0
+					</if>
+					<if test=" pricingMode !=null ">
+						and  f_pricing_mode=#{pricingMode}
+					</if>
+					<if test=" serviceStarttime !=null and serviceStarttime!=''">
+						and f_Service_starttime &lt;= #{serviceStarttime}
+						and f_Service_endtime >= #{serviceStarttime}
+					</if>
+					order by f_update_time desc
+	</select>
+	
+	
+	<select id="selectByPrimaryKey" parameterType="String" resultType="com.net.cms.po.ProvidingResources">
+			select pr.f_ID as id,pr.f_resources_Code as resourcesCode,pr.f_product_id as productId,pr.f_manufacturer_code as manufacturerCode,
+					pr.f_Service_Type as serviceType,pr.f_Providing_name as providingName,pr.f_Service_ability as serviceAbility,
+					pr.f_Ability_uint as abilityUint,pr.f_product_qualify as productQualify,pr.f_Service_prive as servicePrive,
+					pr.f_pricing_mode as pricingMode,pr.f_Service_starttime as serviceStarttime,pr.f_Service_endtime as serviceEndtime,
+					pr.f_Service_area as serviceArea,pr.f_Service_profile as serviceProfile,pr.f_Service_photo as servicePhoto,pr.f_Is_Enable as isEnable,
+					ps.f_product_name as productName,ps.f_serial_ID as serialId
+					from t_providing_resources pr left join t_product_struct ps on pr.f_product_id = ps.f_id
+					 where pr.f_id=#{value,jdbcType=VARCHAR}
+	</select>
+	
+	<delete id="deleteByPrimaryKey" parameterType="String">
+		delete from t_providing_resources where f_id=#{value,jdbcType=VARCHAR}
+	</delete>
+	
+	<select id="querySrList"  parameterType="com.net.cms.po.ServiceRequire" resultType="com.net.cms.po.ProvidingResources">
+		select pr.f_id as id,ps.f_product_name as productName,mb.f_name as manufacturerCode,pr.f_Providing_name as providingName,
+				pr.f_Service_starttime as serviceStarttime,f_service_endtime as serviceEndtime,pr.f_Service_ability as serviceAbility,
+				#{requireCount}*f_Service_prive as resourcesCost,pr.f_product_qualify as productQualify,mb.f_comment_score as commentScore
+				from t_providing_resources pr  left join t_product_struct ps on pr.f_product_id = ps.f_id
+			left join t_manufacturer_basicinfo mb on mb.f_code = pr.f_manufacturer_code
+		where pr.f_product_id in
+		 <foreach collection="productIds" item="pid" open="(" separator="," close=")">
+            	#{pid}
+        </foreach>
+		 and pr.f_Service_Type=#{serviceType} and pr.f_product_qualify=#{requireQualify}
+		and pr.f_Service_ability >=#{requireCount}
+		order by pr.f_Service_prive
+	</select>
+	
+	<select id="queryPrListByIds" resultType="com.net.cms.po.ProvidingResources">
+		select pr.f_id as id,ps.f_product_name as productName,mb.f_name as manufacturerCode,pr.f_Providing_name as providingName,
+				pr.f_Service_starttime as serviceStarttime,f_service_endtime as serviceEndtime,pr.f_Service_ability as serviceAbility,
+				#{sr.requireCount}*f_Service_prive as resourcesCost,f_Service_prive as servicePrive,pr.f_product_qualify as productQualify,mb.f_comment_score as commentScore
+				from t_providing_resources pr  left join t_product_struct ps on pr.f_product_id = ps.f_id
+			left join t_manufacturer_basicinfo mb on mb.f_code = pr.f_manufacturer_code
+		where pr.f_id in 
+		 <foreach collection="ids" item="id" open="(" separator="," close=")">
+            	#{id}
+        </foreach>
+		order by pr.f_Service_prive
+	</select>
+
+</mapper>

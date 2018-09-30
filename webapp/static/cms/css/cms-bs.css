@@ -1,0 +1,67 @@
+/*
+ * Special styles for Bootstrap
+ */
+
+
+
+/* John
+-------------------------------------------------- */
+
+
+/* Forms */
+.bs-adp.form-inline select,
+.bs-adp.form-inline input[type="text"],
+.bs-adp.form-inline input[type="password"] {
+  width: 180px;
+}
+.bs-adp-control-sizing select,
+.bs-adp-control-sizing input[type="text"] + input[type="text"] {
+  margin-top: 10px;
+}
+.bs-adp-form .input-group {
+  margin-bottom: 10px;
+}
+@media (max-width: 767px) {
+.bs-navbar-fixed-top {
+	   position: fixed; 
+	   z-index: 1030;
+	   border-width: 0 0 1px; 
+	   width:100%;
+	  }
+ 	.bs-body-padding-top{
+	  padding-top:145px;
+	  } 
+}
+@media (min-width: 768px) {
+  .bs-navbar-fixed-top {
+	   position: fixed; 
+	   z-index: 1030;
+	   border-width: 0 0 1px;
+	   width:720px;
+	  }  
+	  .bs-body-padding-top{
+	  padding-top:245px;
+	  }
+} 
+@media (min-width: 992px) {
+	.bs-navbar-fixed-top {
+	   position: 1030; 
+	   z-index: 1030;
+	   border-width: 0 0 1px;
+	   width:940px;
+	  }
+	   .bs-body-padding-top{
+	  padding-top:195px;
+	  }
+}
+@media (min-width: 1200px) {
+	 .bs-navbar-fixed-top {
+	   position: fixed; 
+	   z-index: 1030;
+	   border-width: 0 0 1px;
+	   width:1140px;
+	  }
+	  .bs-body-padding-top{
+	  padding-top:145px;
+	  }
+}

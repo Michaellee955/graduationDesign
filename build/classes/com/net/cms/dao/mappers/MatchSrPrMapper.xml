@@ -1,0 +1,72 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.net.cms.dao.MatchSrPrDao" >
+	<insert id="saveOrUpdateMsp">
+		insert into t_match_sr_pr (f_pr_id,f_sr_id,f_level,f_update_time)
+		values
+		<foreach collection="prIds" item="prId" separator="," >  
+		  (
+		  	#{prId,jdbcType=VARCHAR},#{srId,jdbcType=VARCHAR},#{level,jdbcType=INTEGER},NOW()
+		  ) 
+		</foreach>
+		ON DUPLICATE KEY UPDATE f_update_time=values(f_update_time)
+	</insert>
+	
+	<select id="querySmListByFilter" parameterType="com.net.cms.filter.ServiceMatchFilter" resultType="com.net.cms.po.ServiceMatch">
+			select pr.f_id as id,
+			       ps.f_product_name as productName,
+			       mb.f_name as manufacturerCode,
+			       pr.f_Providing_name as providingName,
+			       pr.f_Service_starttime as serviceStarttime,
+			       pr.f_service_endtime as serviceEndtime,
+			       pr.f_Service_ability as serviceAbility,
+			       sr.f_Require_count * f_Service_prive as resourcesCost,
+			       pr.f_Service_prive as servicePrive,
+			       pr.f_product_qualify as productQualify,
+			       mb.f_comment_score as commentScore,
+			       msp.f_level as level,
+			       sr.f_Require_name as requireName,
+			       sr.f_id as srId
+			  from t_match_sr_pr msp,t_providing_resources pr,t_product_struct ps, t_manufacturer_basicinfo mb,t_service_require sr
+			    where pr.f_product_id = ps.f_id  and mb.f_code = pr.f_manufacturer_code and msp.f_pr_id = pr.f_id
+			and sr.f_id = msp.f_sr_id and sr.f_status=0  
+					<if test=" manuCode !=null and manuCode !=''">
+						and  sr.f_manufacturer_code = #{manuCode}
+					</if>
+					<if test=" productName !=null and productName !=''">
+						and  instr(ps.f_product_name,#{productName})&gt;0
+					</if>
+					<if test=" manuName !=null and manuName !=''">
+						and  instr(mb.f_name,#{manuName})&gt;0
+					</if>
+					<if test=" servicePrive !=null and servicePrive !=''">
+						and  instr(pr.f_Service_prive,#{servicePrive})&gt;0
+					</if>
+					<if test=" serviceAbility !=null and serviceAbility !=''">
+						and  instr(pr.f_Service_ability,#{serviceAbility})&gt;0
+					</if>
+					<if test=" providingName !=null and providingName !=''">
+						and  instr(pr.f_Providing_name,#{providingName})&gt;0
+					</if>
+					<if test=" requireName !=null and requireName !=''">
+						and  instr(sr.f_Require_name,#{requireName})&gt;0
+					</if>
+					<if test=" level !=null">
+							and  msp.f_level=#{level}
+					</if>	
+					<if test=" productQualify !=null">
+							and  pr.f_product_qualify=#{productQualify}
+					</if>	
+					<if test=" commentScore !=null and commentScore!=''">
+						and  instr(mb.f_comment_score,#{commentScore})&gt;0
+					</if>
+					<if test=" resourcesCost !=null and resourcesCost!=''">
+						and  instr(sr.f_Require_count * f_Service_prive,#{resourcesCost})&gt;0
+					</if>
+					<if test=" serviceStarttime !=null and serviceStarttime!=''">
+						and pr.f_Service_starttime &lt;= #{serviceStarttime}
+						and pr.f_Service_endtime >= #{serviceStarttime}
+					</if>
+				order by pr.f_Service_prive
+	</select>
+</mapper>

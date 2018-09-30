@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.net.cms.dao.RequireMatchDao" >
+
+	<select id="queryRmListByRrId" resultType="com.net.cms.po.RequireMatch">
+		select rm.f_id as id,ps.f_product_name as productId,mb.f_name as manufacturerCode,
+			rm.f_task_starttime as taskStarttime,rm.f_task_endtime as taskEndtime,
+			rm.f_product_cost as productCost,rm.f_product_number as productNumber,rm.f_product_qualify as productQualify,
+			rm.f_comment_score as commentScore,pr.f_Providing_name as resourceId,f_task_status as taskStatus
+			from t_require_match rm left join t_manufacturer_basicinfo mb on rm.f_manufacturer_code = mb.f_code
+			left join t_product_struct ps  on ps.f_id = rm.f_productid
+			left join t_providing_resources pr on pr.f_id = rm.f_resource_id
+				where rm.f_Resolution_id=#{value,jdbcType=VARCHAR}
+				order by productCost 
+	</select>
+	
+	<insert id="generRmData">
+		insert into t_require_match(f_ID,f_Resolution_id,f_require_id,f_resource_id,f_productid,f_product_number,f_manufacturer_code,f_product_cost,f_product_qualify,f_task_starttime,f_task_endtime,f_update_time,f_task_status,f_comment_score)
+		select replace(uuid(),'-',''),#{rr.id,jdbcType=VARCHAR},#{rr.requireId,jdbcType=VARCHAR},pr.f_id,pr.f_product_id,pr.f_Service_ability,pr.f_manufacturer_code,
+		pr.f_Service_prive*#{rr.resolutionCount},pr.f_product_qualify,pr.f_Service_starttime,pr.f_Service_endtime,now(),0,
+		(select truncate(avg(mb.f_comment_score),1) from t_manufacturer_basicinfo mb where mb.f_code = pr.f_manufacturer_code) as commentScore
+		 from t_providing_resources pr
+		 where pr.f_id in 
+		<foreach collection="ids" item="id" open="(" separator="," close=")">
+            	#{id}
+        </foreach>
+	</insert>
+	
+</mapper>

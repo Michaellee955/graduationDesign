@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.net.cms.dao.ServiceTransDao" >
+
+	<select id="query" parameterType="com.net.cms.filter.ServiceTransFilter" resultType="com.net.cms.po.ServiceTrans">
+				select rm.f_id as id,rm.f_resource_id as resourceId,
+				pr.f_resources_code as resourcesCode,pr.f_Providing_name as providingName,
+				sr.f_Require_name as requireName,mb.f_name as manuName,
+				rm.f_product_number as productNumber,rm.f_product_cost as productCost,
+				rm.f_task_starttime as taskStarttime,rm.f_task_endtime as taskEndtime,rm.f_task_status as taskStatus,rm.f_task_score as taskScore
+				 from t_require_match rm left join t_providing_resources pr on rm.f_resource_id = pr.f_id
+				 left join t_service_require sr on sr.f_id = rm.f_require_id
+				 left join t_manufacturer_basicinfo mb on sr.f_manufacturer_code = mb.f_code
+				 where 1=1 
+				 <if test=" manuCode !=null and manuCode !=''">
+						and  rm.f_manufacturer_code=#{manuCode,jdbcType=VARCHAR}
+				</if>
+				 order by rm.f_update_time desc
+	</select>
+	
+	<update id="updateStatusById">
+		update 	t_require_match set f_task_status=#{status,jdbcType=INTEGER} where f_id=#{id,jdbcType=VARCHAR}
+	</update>
+</mapper>

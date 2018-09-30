@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.net.cms.dao.SysLogDao" >
+
+	<insert id="insertSysLog" parameterType="com.net.cms.po.SysLog">
+		INSERT INTO T_SYS_LOG (
+					F_OPERATE_MODEL,
+					F_OPERATE_ACTION,
+					F_OPERATE_DESC,
+					F_OPERATOR,
+					F_OPERATOR_ID,
+					F_CREATE_TIME
+		)VALUES(
+			 trim(#{operateModel,jdbcType=VARCHAR}),
+			 trim(#{operateAction,jdbcType=VARCHAR}),
+			 trim(#{operateDesc,jdbcType=VARCHAR}),
+			 trim(#{operator,jdbcType=VARCHAR}),
+			 trim(#{operatorId,jdbcType=INTEGER}),
+			 now())
+	</insert>
+</mapper>

@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<decorators defaultdir="/WEB-INF/layouts/">
+	<excludes>
+		<pattern>/static/*</pattern>
+		<pattern>/login*</pattern>
+		<pattern>*/redirectto*</pattern>
+	    <pattern>*/openmodal*</pattern>
+	    <pattern>*/getPic*</pattern>
+	    <pattern>*/getInfo*</pattern>
+	    <pattern>*/asyn*</pattern>	    
+	    <pattern>*/changePwd*</pattern>	
+	    <pattern>*/showVideo*</pattern>	
+	</excludes>
+	
+	<decorator name="noHeader" page="noHeader.jsp">
+		<pattern>*/dialog*</pattern>
+	
+	</decorator>
+	<decorator name="openWin" page="openWin.jsp">
+		<pattern>*/viewInfo*</pattern>
+		<pattern>*/viewHis*</pattern>
+		<pattern>*/personal/register</pattern>
+		<pattern>*/manuBasicInfo/register2</pattern>
+	</decorator>
+	<decorator name="index" page="default.jsp">
+		<pattern>/*</pattern>
+	</decorator>
+</decorators>

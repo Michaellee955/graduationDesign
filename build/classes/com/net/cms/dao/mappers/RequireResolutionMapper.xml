@@ -1,0 +1,86 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.net.cms.dao.RequireResolutionDao" >
+
+	<select id="query" parameterType="com.net.cms.filter.RequireResolutionFilter" resultType="com.net.cms.po.RequireResolution">
+			select rr.f_id as id,rr.f_Resolution_name as resolutionName,rr.f_require_name as requireName,
+					rr.f_Resolution_count as resolutionCount,rr.f_Resolution_level as resolutionLevel,
+					rr.f_Resolution_starttime as resolutionStarttime,rr.f_Resolution_endtime as resolutionEndtime,
+					rr.f_Resolution_cost as resolutionCost,rr.f_Resolution_qualify as resolutionQualify,rr.f_comment_score as commentScore,
+					(select min(rm.f_task_status) from t_require_match rm where rm.f_Resolution_id = rr.f_id) as taskStatus
+				from t_require_resolution rr,t_service_require sr where sr.f_id = f_require_id and f_Issucceed = 1 
+					<if test=" manuCode !=null and manuCode !=''">
+						and  sr.f_manufacturer_code=#{manuCode,jdbcType=VARCHAR}
+					</if>
+					<if test=" requireName !=null and requireName !=''">
+						and  instr(f_require_name,#{requireName})&gt;0
+					</if>
+					<if test=" resolutionName !=null and resolutionName !=''">
+						and  instr(f_Resolution_name,#{resolutionName})&gt;0
+					</if>
+					<if test=" resolutionLevel !=null">
+						and  f_Resolution_level=#{resolutionLevel}
+					</if>	
+					<if test=" resolutionCount !=null">
+						and  instr(f_Resolution_count,#{resolutionCount})&gt;0
+					</if>	
+					<if test=" resolutionCost !=null ">
+						and  instr(f_Resolution_cost,#{resolutionCost})&gt;0
+					</if>
+					<if test=" commentScore !=null">
+						and  instr(f_comment_score,#{commentScore})&gt;0
+					</if>
+					<if test=" resolutionQualify !=null ">
+						and  f_Resolution_qualify=#{resolutionQualify}
+					</if>
+					<if test=" resolutionStarttime !=null and resolutionStarttime!=''">
+						and f_Resolution_starttime &lt;= #{resolutionStarttime}
+						and f_Resolution_endtime >= #{resolutionStarttime}
+					</if>
+					order by f_update_time desc
+	</select>
+
+	<select id="queryRrListByRequireId" resultType="com.net.cms.po.RequireResolution">
+		select rr.f_id as id,rr.f_Resolution_name as resolutionName,rr.f_require_name as requireName,
+				rr.f_Resolution_count as resolutionCount,rr.f_Resolution_level as resolutionLevel,
+				rr.f_Resolution_starttime as resolutionStarttime,rr.f_Resolution_endtime as resolutionEndtime,
+				rr.f_Resolution_cost as resolutionCost,rr.f_Resolution_qualify as resolutionQualify,rr.f_comment_score as commentScore
+			from t_require_resolution rr where rr.f_require_id=#{value,jdbcType=VARCHAR}
+			order by resolutionCost
+	</select>
+	
+	<insert id="saveRrData">
+		insert into t_require_resolution
+			(f_ID,f_Resolution_name,f_require_name,f_require_id,f_Resolution_level,f_Issucceed,f_Resolution_qualify,f_Resolution_starttime,f_Resolution_endtime,f_Resolution_cost,f_Resolution_count,f_comment_score,f_update_time)
+		values
+		<foreach collection="rrList" item="lt" separator="," >  
+		  (
+		  	#{lt.id,jdbcType=VARCHAR},#{lt.resolutionName,jdbcType=VARCHAR},#{lt.requireName,jdbcType=VARCHAR},
+		  	#{lt.requireId,jdbcType=VARCHAR},#{lt.resolutionLevel,jdbcType=INTEGER},#{lt.isSucceed,jdbcType=INTEGER},#{lt.resolutionQualify,jdbcType=INTEGER},		  	#{lt.resolutionStarttime,jdbcType=VARCHAR},#{lt.resolutionEndtime,jdbcType=VARCHAR},
+		  	#{lt.resolutionCost,jdbcType=INTEGER},#{lt.resolutionCount,jdbcType=INTEGER},#{lt.commentScore,jdbcType=DECIMAL},NOW()
+		  ) 
+		</foreach>
+	</insert>
+	
+	<select id="findRrListBySr" resultType="com.net.cms.po.RequireResolution">
+		select pr.f_Service_starttime as resolutionStarttime,f_service_endtime as resolutionEndtime,pr.f_manufacturer_code as manufacturerCode,
+			#{sr.requireCode} as serviceCode,#{sr.requireCount}*f_Service_prive as resolutionCost,pr.f_resources_code as resourceCode
+			from t_providing_resources pr 
+		where pr.f_product_id=#{productId} and pr.f_Service_Type=#{sr.serviceType} and pr.f_product_qualify=#{sr.requireQualify}
+		and pr.f_Service_ability >=#{sr.requireCount}
+		order by pr.f_Service_prive limit #{limit}
+	</select>
+	
+	<select id="findCostAndScore" resultType="com.net.cms.po.RequireResolution">
+		select sum(pr.f_Service_prive*#{requireCount}) as resolutionCost,truncate(avg(mb.f_comment_score),1) as commentScore 
+			from t_providing_resources pr left join t_manufacturer_basicinfo mb on pr.f_manufacturer_code = mb.f_code
+		where pr.f_id in 
+		<foreach collection="ids" item="id" open="(" separator="," close=")">
+            	#{id}
+        </foreach>
+	</select>
+	
+	<update id="updateSuccessById">
+		update 	t_require_resolution set f_Issucceed=1,f_update_time=now() where f_id=#{id,jdbcType=VARCHAR}
+	</update>
+</mapper>

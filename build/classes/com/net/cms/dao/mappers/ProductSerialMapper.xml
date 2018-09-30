@@ -1,0 +1,58 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd" >
+<mapper namespace="com.net.cms.dao.ProductSerialDao" >
+
+	<insert id="saveOrUpdatePs" parameterType="com.net.cms.po.ProductSerial">
+		INSERT INTO t_product_serial (
+					f_ID,f_serial_code,f_Serial_name,f_Is_Enable,f_version,f_update_time
+		)VALUES(
+				#{id,jdbcType=VARCHAR},#{serialCode,jdbcType=VARCHAR},#{serialName,jdbcType=VARCHAR},#{isEnable,jdbcType=INTEGER},
+			  	#{version,jdbcType=VARCHAR},now()
+			 )
+		 on duplicate key update f_update_time=values(f_update_time),f_Serial_name=values(f_Serial_name),f_version=values(f_version),f_Is_Enable=values(f_Is_Enable)
+	</insert>
+	
+	<select id="query" parameterType="com.net.cms.filter.ProductSerialFilter" resultType="com.net.cms.po.ProductSerial">
+		select f_ID as id,f_serial_code as serialCode,f_Serial_name as serialName,f_Is_Enable as isEnable,f_version as  version
+			from t_product_serial where 1=1
+			<if test=" isEnable !=null">
+				and  f_Is_Enable=#{isEnable}
+			</if>	
+			<if test=" serialName !=null and serialName !=''">
+				and  instr(f_Serial_name,#{serialName})&gt;0
+			</if>
+			<if test=" version !=null and version !=''">
+				and  instr(f_version,#{version})&gt;0
+			</if>
+			<if test=" serialCode !=null and serialCode !=''">
+				and  instr(f_serial_code,#{serialCode})&gt;0
+			</if>
+		order by f_update_time desc
+	</select>
+	
+	<select id="selectByPrimaryKey" parameterType="String" resultType="com.net.cms.po.ProductSerial">
+			select f_ID as id,f_serial_code as serialCode,f_Serial_name as serialName,f_Is_Enable as isEnable,f_version as  version
+			from t_product_serial where f_id=#{value}
+	</select>
+	
+	<update id="updateStatusById">
+		update 	t_product_serial set f_Is_Enable=#{isEnable,jdbcType=INTEGER} where f_id=#{id,jdbcType=VARCHAR}
+	</update>
+	
+	<select id="checkSerialCode" resultType="Integer">
+		select count(f_id) as value from  t_product_serial where 1=1
+   		<if test="id !=null and id != ''">
+   			and f_id!=#{id,jdbcType=VARCHAR}
+   		</if>
+   		<if test="serialCode != null and serialCode != ''">
+			and f_serial_code = #{serialCode,jdbcType=VARCHAR}
+		</if>
+   		<if test="version != null and version != ''">
+			and f_version = #{version,jdbcType=VARCHAR}
+		</if>
+	</select>
+	
+	<select id="findAllPsCodeVersion" resultType="com.net.cms.po.KeyValueBean">
+		select ps.f_id as fkey,concat(ps.f_serial_code,' (',ps.f_version,')') as fvalue from t_product_serial ps order by fvalue
+	</select>
+</mapper>
